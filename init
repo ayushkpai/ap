@@ -1,0 +1,2 @@
+gem build ap.gemspec
+gem install ap-0.0.1.gem
