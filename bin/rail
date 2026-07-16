@@ -3,7 +3,7 @@
 user = `whoami`.strip
 puts "Hello, #{user}"
 puts
-puts "AP - Rails App Creator"
+puts "rail - Rails App Creator"
 puts
 
 print "What is the app name?\n> "
