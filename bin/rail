@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 user = `whoami`.strip
+
 puts "Hello, #{user}"
 puts
 puts "rail - Rails App Creator"
@@ -10,7 +11,7 @@ print "What is the app name?\n> "
 app = gets&.strip
 
 if app.nil? || app.empty?
-  puts "App name cannot be empty."
+  puts "❌ App name cannot be empty."
   exit 1
 end
 
@@ -24,7 +25,7 @@ command =
   when "n", "no"
     ["rails", "new", app]
   else
-    puts "Invalid choice. Please enter Y or N."
+    puts "❌ Invalid choice. Please enter Y or N."
     exit 1
   end
 
@@ -36,15 +37,95 @@ puts
 print "Continue? [Y/n] "
 confirm = gets&.strip.to_s.downcase
 
-if ["", "y", "yes"].include?(confirm)
-  system(*command)
-
-  if $?.success?
-    puts "\n✅ Rails app '#{app}' created successfully."
-  else
-    puts "\n❌ Failed to create the Rails app."
-    exit 1
-  end
-else
+unless ["", "y", "yes"].include?(confirm)
   puts "Cancelled."
+  exit
 end
+
+system(*command)
+
+unless $?.success?
+  puts "\n❌ Failed to create the Rails app."
+  exit 1
+end
+
+puts "\n✅ Rails app '#{app}' created successfully."
+
+Dir.chdir(app) do
+  print "\nCreate an initial Git commit? [Y/n] "
+  commit = gets&.strip.to_s.downcase
+
+  if ["", "y", "yes"].include?(commit)
+    unless system("git", "add", ".")
+      puts "❌ git add failed."
+      exit 1
+    end
+
+    print "Commit message [Initial commit]: "
+    message = gets&.strip
+    message = "Initial commit" if message.nil? || message.empty?
+
+    unless system("git", "commit", "-m", message)
+      puts "❌ git commit failed."
+      exit 1
+    end
+
+    puts "✅ Commit created."
+
+    print "\nPush to GitHub? [y/N] "
+    push = gets&.strip.to_s.downcase
+
+    if ["y", "yes"].include?(push)
+      has_remote = system(
+        "git",
+        "remote",
+        "get-url",
+        "origin",
+        out: File::NULL,
+        err: File::NULL
+      )
+
+      unless has_remote
+        print "GitHub repository URL: "
+        remote = gets&.strip
+
+        if remote.nil? || remote.empty?
+          puts "❌ No remote provided."
+          exit 1
+        end
+
+        unless system("git", "remote", "add", "origin", remote)
+          puts "❌ Failed to add remote."
+          exit 1
+        end
+      end
+
+      branch = `git branch --show-current`.strip
+      branch = "main" if branch.empty?
+
+      if system("git", "push", "-u", "origin", branch)
+        puts "✅ Successfully pushed to GitHub."
+      else
+        puts "❌ Push failed."
+      end
+    end
+  end
+
+  print "\nRun the project now? [Y/n] "
+  run = gets&.strip.to_s.downcase
+
+  if ["", "y", "yes"].include?(run)
+    puts
+    puts "🚀 Starting Rails..."
+    puts
+
+    exec("bin/dev")
+  end
+end
+
+puts
+puts "🎉 All done!"
+puts
+puts "Next steps:"
+puts "  cd #{app}"
+puts "  bin/dev"
