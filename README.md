@@ -1,11 +1,11 @@
-# AP
+# Rail
 
 - Open your terminal and clone this repository
     
     First make sure you have a ssh key if you dont have go to my dotfiles repository and follow the instructions
 
     ```
-    git clone git@github.com:ayushkpai/ap.git
+    git clone git@github.com:ayushkpai/rail.git
     ```
 
 - Next install ruby
@@ -15,11 +15,12 @@
 - To init the project
 
     ```
-    ./init
+    gem build rail.gemspec
+    gem install rail-2.0.0.gem
     ```
 
-- To get info
+- To create
 
     ```
-    create
+    rail
     ```
