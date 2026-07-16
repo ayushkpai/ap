@@ -16,7 +16,7 @@
 
     ```
     gem build rail.gemspec
-    gem install rail-2.0.0.gem
+    gem install rail-2.0.2.gem
     ```
 
 - To create
