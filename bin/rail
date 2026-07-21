@@ -1,12 +1,5 @@
 #!/usr/bin/env ruby
 
-user = `whoami`.strip
-
-puts "Hello, #{user}"
-puts
-puts "rail - Rails App Creator"
-puts
-
 print "What is the app name?\n> "
 app = gets&.strip
 
@@ -29,12 +22,10 @@ command =
     exit 1
   end
 
-puts
-puts "About to run:"
+puts "\nAbout to run:"
 puts "  #{command.join(' ')}"
-puts
 
-print "Continue? [Y/n] "
+print "\nContinue? [Y/n] "
 confirm = gets&.strip.to_s.downcase
 
 unless ["", "y", "yes"].include?(confirm)
@@ -52,62 +43,53 @@ end
 puts "\n✅ Rails app '#{app}' created successfully."
 
 Dir.chdir(app) do
-  print "\nCreate an initial Git commit? [Y/n] "
-  commit = gets&.strip.to_s.downcase
+  unless system("git", "add", ".")
+    puts "❌ git add failed."
+    exit 1
+  end
 
-  if ["", "y", "yes"].include?(commit)
-    unless system("git", "add", ".")
-      puts "❌ git add failed."
-      exit 1
-    end
+  unless system("git", "commit", "-m", "Initial commit By Rail")
+    puts "❌ git commit failed."
+    exit 1
+  end
 
-    print "Commit message [Initial commit]: "
-    message = gets&.strip
-    message = "Initial commit" if message.nil? || message.empty?
+  puts "✅ Commit created."
 
-    unless system("git", "commit", "-m", message)
-      puts "❌ git commit failed."
-      exit 1
-    end
+  print "\nPush to GitHub? [y/N] "
+  push = gets&.strip.to_s.downcase
 
-    puts "✅ Commit created."
+  if ["y", "yes"].include?(push)
+    has_remote = system(
+      "git",
+      "remote",
+      "get-url",
+      "origin",
+      out: File::NULL,
+      err: File::NULL
+    )
 
-    print "\nPush to GitHub? [y/N] "
-    push = gets&.strip.to_s.downcase
+    unless has_remote
+      print "GitHub repository URL: "
+      remote = gets&.strip
 
-    if ["y", "yes"].include?(push)
-      has_remote = system(
-        "git",
-        "remote",
-        "get-url",
-        "origin",
-        out: File::NULL,
-        err: File::NULL
-      )
-
-      unless has_remote
-        print "GitHub repository URL: "
-        remote = gets&.strip
-
-        if remote.nil? || remote.empty?
-          puts "❌ No remote provided."
-          exit 1
-        end
-
-        unless system("git", "remote", "add", "origin", remote)
-          puts "❌ Failed to add remote."
-          exit 1
-        end
+      if remote.nil? || remote.empty?
+        puts "❌ No remote provided."
+        exit 1
       end
 
-      branch = `git branch --show-current`.strip
-      branch = "main" if branch.empty?
-
-      if system("git", "push", "-u", "origin", branch)
-        puts "✅ Successfully pushed to GitHub."
-      else
-        puts "❌ Push failed."
+      unless system("git", "remote", "add", "origin", remote)
+        puts "❌ Failed to add remote."
+        exit 1
       end
+    end
+
+    branch = `git branch --show-current`.strip
+    branch = "main" if branch.empty?
+
+    if system("git", "push", "-u", "origin", branch)
+      puts "✅ Successfully pushed to GitHub."
+    else
+      puts "❌ Push failed."
     end
   end
 
@@ -123,9 +105,4 @@ Dir.chdir(app) do
   end
 end
 
-puts
-puts "🎉 All done!"
-puts
-puts "Next steps:"
-puts "  cd #{app}"
-puts "  bin/dev"
+puts "\n🎉 All done!"
