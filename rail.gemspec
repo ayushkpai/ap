@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name        = "rail"
-  spec.version     = "2.0.2"
+  spec.version     = "2.0.3"
   spec.license     = "MIT"
   spec.author      = "Ayush Pai"
   spec.email       = "ayushpai@ayushpai.com"
