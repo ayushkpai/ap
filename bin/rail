@@ -138,26 +138,26 @@ Dir.chdir(app) do
   if ["", "y", "yes"].include?(run)
     puts "\n🚀 Starting Rails..."
 
-Open3.popen2e("bin/dev") do |_stdin, stdout, wait_thread|
-  pid = wait_thread.pid
-  started = false
+    Open3.popen2e("bin/dev") do |_stdin, stdout, wait_thread|
+      pid = wait_thread.pid
+      started = false
 
-  trap("INT") do
-    puts "\n🛑 Stopping Rails..."
-    Process.kill("INT", pid) rescue nil
-  end
-
-  stdout.each_line do |line|
-    unless started
-      if (url = line[%r{https?://\S+}])
-        puts "✅ Started on #{url}"
-        started = true
+      trap("INT") do
+        puts "\n🛑 Stopping Rails..."
+        Process.kill("INT", pid) rescue nil
       end
-    end
-  end
 
-  wait_thread.value
-end
+      stdout.each_line do |line|
+        unless started
+          if (url = line[%r{https?://\S+}])
+            puts "✅ Started on #{url}"
+            started = true
+          end
+        end
+      end
+
+      wait_thread.value
+    end
   end
 end
 
