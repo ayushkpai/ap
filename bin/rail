@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require "open3"
+
 print "What is the app name?\n> "
 app = gets&.strip
 
@@ -33,27 +35,42 @@ unless ["", "y", "yes"].include?(confirm)
   exit
 end
 
-system(*command)
+print "\n🚀 Creating Rails app..."
+success = system(*command, out: File::NULL, err: File::NULL)
+puts success ? " ✅" : " ❌"
 
-unless $?.success?
-  puts "\n❌ Failed to create the Rails app."
+unless success
+  puts "Failed to create the Rails app."
   exit 1
 end
 
-puts "\n✅ Rails app '#{app}' created successfully."
+puts "✅ Rails app '#{app}' created successfully."
 
 Dir.chdir(app) do
-  unless system("git", "add", ".")
-    puts "❌ git add failed."
+  print "\n📦 Staging files..."
+  success = system("git", "add", ".", out: File::NULL, err: File::NULL)
+  puts success ? " ✅" : " ❌"
+
+  unless success
+    puts "git add failed."
     exit 1
   end
 
-  unless system("git", "commit", "-m", "Initial commit By Rail")
-    puts "❌ git commit failed."
+  print "📝 Creating initial commit..."
+  success = system(
+    "git",
+    "commit",
+    "-m",
+    "Initial commit By Rail",
+    out: File::NULL,
+    err: File::NULL
+  )
+  puts success ? " ✅" : " ❌"
+
+  unless success
+    puts "git commit failed."
     exit 1
   end
-
-  puts "✅ Commit created."
 
   print "\nPush to GitHub? [y/N] "
   push = gets&.strip.to_s.downcase
@@ -77,8 +94,20 @@ Dir.chdir(app) do
         exit 1
       end
 
-      unless system("git", "remote", "add", "origin", remote)
-        puts "❌ Failed to add remote."
+      print "🔗 Adding remote..."
+      success = system(
+        "git",
+        "remote",
+        "add",
+        "origin",
+        remote,
+        out: File::NULL,
+        err: File::NULL
+      )
+      puts success ? " ✅" : " ❌"
+
+      unless success
+        puts "Failed to add remote."
         exit 1
       end
     end
@@ -86,10 +115,20 @@ Dir.chdir(app) do
     branch = `git branch --show-current`.strip
     branch = "main" if branch.empty?
 
-    if system("git", "push", "-u", "origin", branch)
-      puts "✅ Successfully pushed to GitHub."
-    else
-      puts "❌ Push failed."
+    print "⬆️  Pushing to GitHub..."
+    success = system(
+      "git",
+      "push",
+      "-u",
+      "origin",
+      branch,
+      out: File::NULL,
+      err: File::NULL
+    )
+    puts success ? " ✅" : " ❌"
+
+    unless success
+      puts "Push failed."
     end
   end
 
@@ -97,11 +136,22 @@ Dir.chdir(app) do
   run = gets&.strip.to_s.downcase
 
   if ["", "y", "yes"].include?(run)
-    puts
-    puts "🚀 Starting Rails..."
-    puts
+    puts "\n🚀 Starting Rails..."
 
-    exec("bin/dev")
+    Open3.popen2e("bin/dev") do |_stdin, stdout, wait_thread|
+      printed = false
+
+      stdout.each_line do |line|
+        next if printed
+
+        if url = line[%r{https?://\S+}]
+          puts "✅ Started on #{url}"
+          printed = true
+        end
+      end
+
+      wait_thread.join
+    end
   end
 end
 
