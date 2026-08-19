@@ -4,7 +4,8 @@ require "io/console"
 
 WEBSITES = [
   ["Website", "https://ayushpai.com"],
-  ["GitHub", "https://github.com/ayushkpai"]
+  ["GitHub", "https://github.com/ayushkpai"],
+  ["Retro Grand Prix", "https://ayushkpai.github.io/retro-grand-prix"]
 ]
 
 selected = 0
