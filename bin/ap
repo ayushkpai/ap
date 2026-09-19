@@ -5,6 +5,7 @@ require "io/console"
 WEBSITES = [
   ["Website", "https://ayushpai.com"],
   ["GitHub", "https://github.com/ayushkpai"],
+  ["GitHub Org.", "https://github.com/paiandco"],
   ["Retro Grand Prix", "https://ayushpai.com/retro-grand-prix"]
 ]
 
