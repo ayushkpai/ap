@@ -6,6 +6,7 @@ WEBSITES = [
   ["Website", "https://ayushpai.com"],
   ["GitHub", "https://github.com/ayushkpai"],
   ["GitHub Org.", "https://github.com/paiandco"],
+  ["The Cake Lover", "https://www.bribooks.com/bookstore/the-cake-lover-by-ayush-pai/"],
 ]
 
 selected = 0
